@@ -1,16 +1,49 @@
+<template>
+  <div :class="className" :style="style" v-if="show">
+    <div v-bind="labelProps">
+      <component :is="label" v-if="label" />
+    </div>
+    <div class="v3-form-item-container">
+      <slot></slot>
+      <component :is="child" v-bind="childProps" />
+      <span class="v3-form-item-error">{{ errorMsg }} </span>
+    </div>
+  </div>
+</template>
 <script lang="ts" setup>
-import { computed, createElementVNode, inject, ref } from 'vue'
-import { FormItemProps, FormProps } from './interface'
+import {
+  computed,
+  inject,
+  ref,
+  h,
+  onBeforeUnmount,
+  getCurrentInstance,
+  watch,
+  isVNode
+} from 'vue'
+import { FormItemProps, FormProps, RegisterRules, Validate } from './interface'
+import { components } from './const'
 
-const contextData = inject<FormProps>('context', {})
+import { get, set } from 'lodash'
+let unRegisterRules: Function | undefined
+
+const context = inject<FormProps>('context', {})
+const registerRules = inject<RegisterRules>('registerRules')
+const validate = inject<Validate>('validate')
+const slots = inject<Record<string,any>>('slots')
 const props = defineProps<FormItemProps>()
-const textAlign = computed(() => props.labelAlign ?? contextData?.labelAlign)
+
+const textAlign = computed(() => props.labelAlign ?? context?.labelAlign)
 const errorMsg = ref()
-const show = ref()
+const show = ref(true)
+const triggerType = computed(() => {
+  let arr = Array.isArray(props.rules) ? props.rules : [props.rules]
+  return arr.find(obj => obj?.trigger)?.trigger ?? 'oninput'
+})
 const className = computed(() => {
   const str: string[] = ['v3-form-item']
-  const span = props.span ?? contextData?.span
-  const offset = props.offset ?? contextData?.offset
+  const span = props.span ?? context?.span
+  const offset = props.offset ?? context?.offset
   const topClass = textAlign.value === 'top' ? 'hyk-form-item-top' : ''
   const errorClass = errorMsg.value ? 'item_error' : ''
   if (span) {
@@ -21,7 +54,7 @@ const className = computed(() => {
   }
   const arr = ['xs', 'sm', 'md', 'lg', 'xl']
   arr.forEach(key => {
-    const o = props[key as 'xs'] ?? contextData?.[key as 'xs']
+    const o = props[key as 'xs'] ?? context?.[key as 'xs']
     if (!o) return ''
     if (typeof o === 'object') {
       if (o.span) {
@@ -42,22 +75,118 @@ const className = computed(() => {
   }
   return str.join(' ')
 })
+const getEl = (el?: FormItemProps['label'], defaultEl = 'div'): any => {
+  if (!el) return defaultEl
+  if (isVNode(el)) return el
+  const key = components[el as keyof typeof components]
+  if (typeof key === 'object') return key
+  return getCurrentInstance()?.appContext.app.component(key ?? el) ?? defaultEl
+}
+const childProps = computed(() => {
+  const setVal = (e: any) => {
+    const val = e?.target?.value ?? e
+    if (props.field) {
+      set(context.formData ?? {}, props.field, val)
+    }
+  }
+  const value = props.field ? get(context.formData, props.field) : undefined
+  const p = {
+    size: context.size,
+    disabled: context.disabled,
+    ...props.props,
+    value,
+    modelValue: value,
+    oninput(...args: any[]) {
+      setVal(args[0])
+      props.props?.oninput?.(...args)
+    },
+    onchange(...args: any[]) {
+      setVal(args[0])
+      props.props?.onchange?.(...args)
+    }
+  }
+  if (props.field && props.rules) {
+    const key = triggerType.value as keyof typeof p
+    const fn = p[key]
+    p[key] = (...args: any[]) => {
+      fn(...args)
+      validate?.([props.field as string])
+        .then(() => {
+          errorMsg.value = ''
+        })
+        .catch(errors => {
+          errorMsg.value = errors?.[0]?.message
+        })
+    }
+  }
+  return p
+})
 const style = computed(() => {
   return {
-    minWidth: props.minItemWidth ?? contextData?.minItemWidth
+    minWidth: props.minItemWidth ?? context?.minItemWidth
   }
 })
-console.log(123123)
+const child = computed(() => {
+  if (props.field && slots?.[props.field]) {
+    return slots[props.field] 
+  }
+  const el = getEl(props.el)
+  return h(
+    el,
+    null,
+    props?.slots ?? (el === 'div' ? childProps.value.value : undefined)
+  )
+})
 
-const render = () => {
-  console.log(123123)
-  return createElementVNode('div', {
-    value: 123,
-    style,
-    class: className
-  })
-}
-defineExpose({
-  render
+const isRequired = computed(() => {
+  if (!props.rules) return props.required
+  if (Array.isArray(props.rules)) return props.rules.some(item => item.required)
+  return props.rules.required
+})
+const labelProps = computed(() => {
+  return {
+    title: typeof props.label === 'string' ? props.label : '',
+    class: `v3-form-item-label ${isRequired.value ? 'required' : ''}`,
+    style: {
+      width: props.labelWidth ?? context.labelWidth,
+      textAlign: textAlign.value === 'top' ? 'left' : textAlign.value
+    }
+  }
+})
+const label = computed(() => {
+  if (props.label === undefined) return
+  if (isVNode(props.label)) return props.label
+  return h(getEl(props.label, 'label'), null, props.label as any)
+})
+watch(
+  [() => props.rules, () => props.field, () => show.value],
+  () => {
+    unRegisterRules?.()
+    if (props.field && props.rules && show.value) {
+      unRegisterRules = registerRules?.(props.field, {
+        rules: props.rules,
+        setError(msg: string) {
+          errorMsg.value = msg
+        }
+      })
+    }
+  },
+  {
+    immediate: true
+  }
+)
+watch(
+  [() => props.props?.value, () => props.field],
+  () => {
+    if (props.field) {
+      set(context.formData ?? {}, props.field, props.props?.value)
+    }
+  },
+  {
+    immediate: true
+  }
+)
+onBeforeUnmount(() => {
+  unRegisterRules?.()
 })
 </script>
