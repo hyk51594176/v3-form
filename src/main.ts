@@ -4,7 +4,7 @@ import 'element-plus/dist/index.css'
 import 'view-ui-plus/dist/styles/viewuiplus.css'
 
 import './components/index.scss'
-import { registerComponents } from './components'
+import { registerComponents } from './index'
 import { Input } from 'view-ui-plus'
 
 import App from './App.vue'
