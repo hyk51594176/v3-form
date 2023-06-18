@@ -3,10 +3,12 @@
   "private": true,
   "version": "0.0.1",
   "type": "module",
+  "author": "51594176@qq.com",
   "scripts": {
     "dev": "vite",
     "build": "vue-tsc && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "release": "npm run build && npm publish --access public"
   },
   "dependencies": {
     "async-validator": "^4.2.5",
