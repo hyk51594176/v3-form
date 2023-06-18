@@ -40,7 +40,7 @@ export interface FormItemProps extends Context {
 export const defineColumns = (columns: FormItemProps[]) => columns
 
 type Params = {
-  rules: Required<FormItemProps>['rules'],
+  rules?: Required<FormItemProps>['rules'],
   setError: (msg: string) => void
 }
 export type ItemRules = {
@@ -48,7 +48,7 @@ export type ItemRules = {
 }
 export interface ValidateParams {
   rule: {
-    [k: string]: RuleItem | RuleItem[]
+    [k: string]: Required<FormItemProps>['rules']
   }
   source: {
     [k: string]: any

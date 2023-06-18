@@ -1,7 +1,7 @@
 <template>
   <div :class="className" :style="style" v-if="show">
-    <div v-bind="labelProps">
-      <component :is="label" v-if="label" />
+    <div v-bind="labelProps" v-if="label">
+      <component :is="label" />
     </div>
     <div class="v3-form-item-container">
       <component :is="child" v-bind="childProps" />
@@ -165,7 +165,7 @@ watch(
   [() => props.rules, () => props.field, () => show.value],
   () => {
     unRegisterRules?.()
-    if (props.field && props.rules && show.value) {
+    if (props.field && show.value) {
       unRegisterRules = registerRules?.(props.field, {
         rules: props.rules,
         setError(msg: string) {

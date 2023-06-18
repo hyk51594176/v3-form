@@ -24,7 +24,7 @@ const props = withDefaults(defineProps<FormProps>(), {
   labelAlign: 'right',
   labelWidth: '80px',
   minItemWidth: '200px',
-  formData: () => ({})
+  formData: () => reactive({})
 })
 
 // 表单项
@@ -45,8 +45,8 @@ const validate: Validate = (fields = []) => {
   const { rule, source } = arr.reduce(
     (obj, key) => {
       const val = get(props.formData, key)
-      if (itemRules[key]) {
-        obj.rule[key] = itemRules[key].rules
+      if (itemRules[key] && itemRules[key].rules) {
+        obj.rule[key] = itemRules[key].rules!
         obj.source[key] = val
       }
       set(data, key, val)

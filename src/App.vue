@@ -1,8 +1,11 @@
 <template>
-  <Form :formData="data" span="12" :columns="columns" ref="form">
-    <template #submit>
-      <el-button type="primary" @click="submit">提交</el-button>
+  <Form span="12" :columns="columns" ref="form">
+    <template #address="row">
+      <input v-bind="row" />
     </template>
+    <FormItem span="24" label="">
+      <el-button type="primary" @click="submit">提交</el-button>
+    </FormItem>
   </Form>
 </template>
 <script setup lang="tsx">
@@ -14,21 +17,31 @@ import FormItem from './components/FormItem.vue'
 import { defineColumns } from './components/interface'
 import { Icon } from 'view-ui-plus'
 
-const data = ref({ name: '张三' })
 const columns = defineColumns([
   {
     label: '姓名',
     el: 'input',
     field: 'name',
-    rules: { required: true, message: '请输入姓名' }
+    rules: { required: true, message: '请输入姓名' },
+    props: {
+      value: '张三'
+    }
   },
   {
     label: '性别',
     field: 'sex',
+    el: 'input2',
     props: {
       value: '男'
+    }
+  },
+  {
+    label: '地址',
+    field: 'address',
+    props: {
+      value: '浙江'
     },
-    rules: { required: true, message: '请输入性别' }
+    rules: { required: true, message: '请输入地址' }
   },
   {
     label: <h2 style={{ display: 'inline-block' }}>年龄</h2>,
@@ -42,11 +55,6 @@ const columns = defineColumns([
       prepend: () => <Icon type="ios-person-outline" />
     },
     rules: { required: true, message: '请输入年龄' }
-  },
-  {
-    field: 'submit',
-    label: '',
-    span: 24
   }
 ])
 const form = ref()
