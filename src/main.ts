@@ -1,5 +1,5 @@
 import { createApp } from 'vue'
-import { ElInput,ElButton } from 'element-plus'
+import { ElInput, ElButton } from 'element-plus'
 import 'element-plus/dist/index.css'
 import 'view-ui-plus/dist/styles/viewuiplus.css'
 

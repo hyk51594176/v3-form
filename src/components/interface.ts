@@ -38,10 +38,6 @@ export interface FormItemProps extends Context {
 }
 
 export const defineColumns = (columns: FormItemProps[]) => columns
-export const enum UpdateType {
-  unmount,
-  mount
-}
 
 type Params = {
   rules: Required<FormItemProps>['rules'],

@@ -4,7 +4,6 @@
       <component :is="label" v-if="label" />
     </div>
     <div class="v3-form-item-container">
-      <slot></slot>
       <component :is="child" v-bind="childProps" />
       <span class="v3-form-item-error">{{ errorMsg }} </span>
     </div>
@@ -19,7 +18,8 @@ import {
   onBeforeUnmount,
   getCurrentInstance,
   watch,
-  isVNode
+  isVNode,
+  useSlots
 } from 'vue'
 import { FormItemProps, FormProps, RegisterRules, Validate } from './interface'
 import { components } from './const'
@@ -30,9 +30,9 @@ let unRegisterRules: Function | undefined
 const context = inject<FormProps>('context', {})
 const registerRules = inject<RegisterRules>('registerRules')
 const validate = inject<Validate>('validate')
-const slots = inject<Record<string,any>>('slots')
+const parentSlots = inject<Record<string, any>>('slots')
 const props = defineProps<FormItemProps>()
-
+const slots = useSlots()
 const textAlign = computed(() => props.labelAlign ?? context?.labelAlign)
 const errorMsg = ref()
 const show = ref(true)
@@ -77,7 +77,9 @@ const className = computed(() => {
 })
 const getEl = (el?: FormItemProps['label'], defaultEl = 'div'): any => {
   if (!el) return defaultEl
-  if (isVNode(el)) return el
+  if (isVNode(el)) {
+    return el
+  }
   const key = components[el as keyof typeof components]
   if (typeof key === 'object') return key
   return getCurrentInstance()?.appContext.app.component(key ?? el) ?? defaultEl
@@ -127,10 +129,10 @@ const style = computed(() => {
   }
 })
 const child = computed(() => {
-  if (props.field && slots?.[props.field]) {
-    return slots[props.field] 
+  if (props.field && parentSlots?.[props.field]) {
+    return parentSlots[props.field]
   }
-  const el = getEl(props.el)
+  const el = slots.default ?? getEl(props.el)
   return h(
     el,
     null,
@@ -155,8 +157,9 @@ const labelProps = computed(() => {
 })
 const label = computed(() => {
   if (props.label === undefined) return
-  if (isVNode(props.label)) return props.label
-  return h(getEl(props.label, 'label'), null, props.label as any)
+  const el = getEl(props.label, 'label')
+  if (isVNode(el)) return el
+  return h(el, null, props.label as any)
 })
 watch(
   [() => props.rules, () => props.field, () => show.value],
@@ -178,7 +181,10 @@ watch(
 watch(
   [() => props.props?.value, () => props.field],
   () => {
-    if (props.field) {
+    if (
+      props.field &&
+      Object.prototype.hasOwnProperty.call(props.props ?? {}, 'value')
+    ) {
       set(context.formData ?? {}, props.field, props.props?.value)
     }
   },

@@ -1,10 +1,8 @@
 <template>
   <Form :formData="data" span="12" :columns="columns" ref="form">
-    <!-- <FormItem el="ElInput" field="name" label="姓名" /> -->
-    <FormItem span="24" label="">
+    <template #submit>
       <el-button type="primary" @click="submit">提交</el-button>
-    </FormItem>
- 
+    </template>
   </Form>
 </template>
 <script setup lang="tsx">
@@ -34,7 +32,7 @@ const columns = defineColumns([
   },
   {
     label: <h2 style={{ display: 'inline-block' }}>年龄</h2>,
-    el: <input/>,
+    el: <input />,
     field: 'age',
     props: {
       type: 'number',
@@ -44,10 +42,16 @@ const columns = defineColumns([
       prepend: () => <Icon type="ios-person-outline" />
     },
     rules: { required: true, message: '请输入年龄' }
+  },
+  {
+    field: 'submit',
+    label: '',
+    span: 24
   }
 ])
 const form = ref()
 const submit = async () => {
-  await form.value.validate()
+  const data = await form.value.validate()
+  console.log('data :', data)
 }
 </script>
