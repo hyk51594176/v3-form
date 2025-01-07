@@ -1,0 +1,12 @@
+
+src
+node_modules
+.gitignore
+.npmignore
+index.html
+package-lock.json
+tsconfig.json
+tsconfig.node.json
+vite.config.ts
+public
+.vscode
