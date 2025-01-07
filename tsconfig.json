@@ -13,6 +13,7 @@
     "isolatedModules": true,
     "noEmit": false,
     "jsx": "preserve",
+    "noImplicitAny": false,
     "types": ["element-plus/global"],
 
     /* Linting */

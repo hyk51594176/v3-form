@@ -132,7 +132,7 @@ const child = computed(() => {
   if (props.field && parentSlots?.[props.field]) {
     return parentSlots[props.field]
   }
-  const el = slots.default ?? getEl(props.el)
+  const el = (slots as unknown as any).default ?? getEl(props.el)
   return h(
     el,
     null,

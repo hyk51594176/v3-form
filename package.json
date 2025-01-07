@@ -1,7 +1,7 @@
 {
   "name": "@hanyk/v3-form",
   "private": false,
-  "version": "0.0.3",
+  "version": "0.0.4",
   "author": "51594176@qq.com",
   "scripts": {
     "dev": "vite",
@@ -11,29 +11,23 @@
   },
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
-  "exports": {
-    ".": {
-      "import": "./dist/index.js",
-      "require": "./dist/index.cjs"
-    }
-  },
   "typings": "./types/index.d.ts",
   "dependencies": {
     "async-validator": "^4.2.5",
     "lodash": "^4.17.21",
-    "vue": "^3.3.4"
+    "vue": "^3.3.4",
+    "vue-tsc": "^2.2.0"
   },
   "devDependencies": {
-    "element-plus": "^2.3.6",
-    "view-ui-plus": "^1.3.14",
     "@types/lodash-es": "^4.17.7",
     "@types/node": "^20.3.1",
     "@vitejs/plugin-vue": "^4.1.0",
     "@vitejs/plugin-vue-jsx": "^3.0.1",
+    "element-plus": "^2.3.6",
     "sass": "^1.63.4",
     "typescript": "^5.0.2",
-    "vite": "^4.3.9",
-    "vue-tsc": "^1.4.2"
+    "view-ui-plus": "^1.3.14",
+    "vite": "^4.3.9"
   },
   "publishConfig": {
     "registry": "https://registry.npmjs.org/"
