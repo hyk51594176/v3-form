@@ -4,7 +4,11 @@
       <component :is="label" />
     </div>
     <div class="v3-form-item-container">
-      <component :is="child" v-bind="childProps" />
+      <component
+        :is="child"
+        v-bind="childProps"
+        @update:modelValue="onUpdateModelValue"
+      />
       <span class="v3-form-item-error">{{ errorMsg }} </span>
     </div>
   </div>
@@ -37,8 +41,11 @@ const textAlign = computed(() => props.labelAlign ?? context?.labelAlign)
 const errorMsg = ref()
 const show = ref(true)
 const triggerType = computed(() => {
-  let arr = Array.isArray(props.rules) ? props.rules : [props.rules]
-  return arr.find(obj => obj?.trigger)?.trigger ?? 'oninput'
+  if (props.field && props.rules) {
+    let arr = Array.isArray(props.rules) ? props.rules : [props.rules]
+    return arr.find(obj => obj?.trigger)?.trigger ?? 'oninput'
+  }
+  return null
 })
 const className = computed(() => {
   const str: string[] = ['v3-form-item']
@@ -84,14 +91,30 @@ const getEl = (el?: FormItemProps['label'], defaultEl = 'div'): any => {
   if (typeof key === 'object') return key
   return getCurrentInstance()?.appContext.app.component(key ?? el) ?? defaultEl
 }
-const childProps = computed(() => {
-  const setVal = (e: any) => {
-    const val = e?.target?.value ?? e
-    if (props.field) {
-      set(context.formData ?? {}, props.field, val)
-    }
+
+const setVal = (e: any) => {
+  const val = e?.target?.value ?? e
+  if (props.field) {
+    set(context.formData ?? {}, props.field, val)
   }
+}
+const _validate = () => {
+  validate?.([props.field as string])
+    .then(() => {
+      errorMsg.value = ''
+    })
+    .catch(errors => {
+      errorMsg.value = errors?.[0]?.message
+    })
+}
+const onUpdateModelValue = (...args: any[]) => {
+  setVal(args[0])
+  props.props?.['onupdate:modelValue']?.(...args)
+  _validate()
+}
+const childProps = computed(() => {
   const value = props.field ? get(context.formData, props.field) : undefined
+
   const p = {
     size: context.size,
     disabled: context.disabled,
@@ -101,24 +124,16 @@ const childProps = computed(() => {
     oninput(...args: any[]) {
       setVal(args[0])
       props.props?.oninput?.(...args)
+      if (triggerType.value === 'oninput') {
+        _validate()
+      }
     },
     onchange(...args: any[]) {
       setVal(args[0])
       props.props?.onchange?.(...args)
-    }
-  }
-  if (props.field && props.rules) {
-    const key = triggerType.value as keyof typeof p
-    const fn = p[key]
-    p[key] = (...args: any[]) => {
-      fn(...args)
-      validate?.([props.field as string])
-        .then(() => {
-          errorMsg.value = ''
-        })
-        .catch(errors => {
-          errorMsg.value = errors?.[0]?.message
-        })
+      if (triggerType.value === 'onchange') {
+        _validate()
+      }
     }
   }
   return p
