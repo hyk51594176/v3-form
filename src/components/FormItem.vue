@@ -140,6 +140,7 @@ const childProps = computed(() => {
 })
 const style = computed(() => {
   return {
+    ...props.style,
     minWidth: props.minItemWidth ?? context?.minItemWidth
   }
 })
@@ -165,6 +166,7 @@ const labelProps = computed(() => {
     title: typeof props.label === 'string' ? props.label : '',
     class: `v3-form-item-label ${isRequired.value ? 'required' : ''}`,
     style: {
+      marginRight: props.label ? undefined : '0px',
       width: props.labelWidth ?? context.labelWidth,
       textAlign: textAlign.value === 'top' ? 'left' : textAlign.value
     }

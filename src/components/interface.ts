@@ -1,5 +1,5 @@
 import { RuleItem } from "async-validator"
-import { VNode } from "vue"
+import { CSSProperties, VNode } from "vue"
 
 type Layout = {
   span?: string | number
@@ -35,6 +35,7 @@ export interface FormItemProps extends Context {
   required?: boolean
   props?: Record<string, any>
   slots?: any
+  style?: CSSProperties
 }
 
 export const defineColumns = (columns: FormItemProps[]) => columns

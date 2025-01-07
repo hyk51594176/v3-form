@@ -1,7 +1,7 @@
 {
   "name": "@hanyk/v3-form",
   "private": false,
-  "version": "0.0.9",
+  "version": "0.1.0",
   "author": "51594176@qq.com",
   "scripts": {
     "dev": "vite",
