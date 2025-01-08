@@ -1,5 +1,5 @@
 <template>
-  <div :class="className" :style="style" v-if="show">
+  <div :class="className" :style="style" v-if="show" :data-field="field">
     <div v-bind="labelProps" v-if="label">
       <component :is="label" />
     </div>

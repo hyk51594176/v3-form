@@ -122,7 +122,6 @@ $--breakpoints: (
 
 .v3-form-item {
   display: inline-flex;
-  padding-bottom: 10px;
   align-items: center;
   align-self: baseline;
   min-width: 100px;
@@ -164,7 +163,7 @@ $--breakpoints: (
   left: 0;
 }
 .item_error {
-  padding-bottom: 25px;
+  padding-bottom: 20px;
   *{
     border-color: red !important;
     --el-input-border-color: red !important;

@@ -58,8 +58,21 @@ const validate: Validate = (fields = []) => {
     .validate(source)
     .then(() => data)
     .catch(error => {
+      let isScroll = false
+
       error?.errors?.forEach((obj: any) => {
         itemRules[obj.field]?.setError?.(obj.message)
+        if (!isScroll) {
+          const dom = document.querySelector(`[data-field='${obj.field}']`)
+          if (dom) {
+            isScroll = true
+            dom?.scrollIntoView({
+              behavior: 'smooth',
+              block: 'center',
+              inline: 'start'
+            })
+          }
+        }
       })
       return Promise.reject(error?.errors)
     })
